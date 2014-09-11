@@ -1,0 +1,23 @@
+CREATE TABLE experiment (
+    id SERIAL,
+    peptide_index integer,
+    ipi varchar(20),
+    description text,
+    symbol varchar(20),
+    sequence varchar(100),
+    mass double precision,
+    charge smallint,
+    segment smallint,
+    ratio real,
+    intensity double precision,
+    num_ms2_peaks integer,
+    num_candidate_peaks integer,
+    max_light_intensity real,
+    light_noise real,
+    max_heavy_intensity real,
+    heavy_noise real,
+    rsquared real,
+    entry integer,
+    link varchar(100),
+    PRIMARY KEY(id)
+);
