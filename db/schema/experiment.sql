@@ -1,5 +1,5 @@
-CREATE TABLE experiment (
-    id SERIAL,
+CREATE TABLE IF NOT EXISTS experiment (
+    id SERIAL UNIQUE,
     peptide_index integer,
     ipi varchar(20),
     description text,
