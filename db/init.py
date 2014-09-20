@@ -1,14 +1,9 @@
-from config import PGSQL_DATABASE_NAME, PGSQL_DATABASE_USER, PGSQL_DATABASE_PASSWORD
-import os, psycopg2, sys
+from db import Database
+import os
 
 def main():
-    conn = psycopg2.connect(
-        database = PGSQL_DATABASE_NAME,
-        user = PGSQL_DATABASE_USER,
-        password = PGSQL_DATABASE_PASSWORD
-    )
 
-    cur = conn.cursor()
+    db = Database()
 
     for root, dirs, files in os.walk('schema'):
         # moving experiments.sql to the end since it depends on other tables
@@ -18,12 +13,10 @@ def main():
             if file.endswith('.sql'):
                 with open(os.path.join('schema', file), 'r') as table:
                     create_sql = table.read()
+                    db.cursor.execute(create_sql)
+                    db.connection.commit()
 
-                cur.execute(create_sql)
-                conn.commit()
-
-    cur.close()
-    conn.close()
+    db.close
 
 if __name__ == "__main__":
     main()
