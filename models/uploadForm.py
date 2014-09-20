@@ -1,24 +1,22 @@
-from wtforms import Form, BooleanField, TextField, SelectField, PasswordField, validators
+from wtforms import Form, BooleanField, TextField, TextAreaField, SelectField, PasswordField, validators
 
-class UploadForm(Form)
-    organism = SelectField('Organism', [InputRequired(), check_against_db()])
-    sample_type = SelectField('Sample Type', [InputRequired(), check_against_db ()])
-    experiment_type = SelectField('Experiment Type', [InputRequired(), check_against_db()])
-    cell_line = SelectField('Cell Line', [Optional(), check_against_db()])
-    inhibitor = SelectField('Inhibitor', [Optional(), check_against_db()])
-    probe = SelectField('Probe', [Optional(), check_against_db()])
-    username = TextField('Username', [InputRequired(), check_against_db()])
-    dataset_name = TextField('Dataset Name', [InputRequired()])
-    description = TextAreaField('Decription', [InputRequired()])
-
-    def check_against_db(name):
-    entry = field.data
-
-    message = '%s not found in %s database' % (name, entry)
+def check_against_db():
+    message = 'Parameter not found in database'
 
     def _check_db(form, field):
         return db.cursor.execute(Template(
-            'SELECT EXISTS(SELECT 1 FROM $table WHERE id = %(entry)s)'
-        ).substitute(table = name), { 'entry': entry })
+            'SELECT EXISTS(SELECT 1 FROM $table WHERE id = %(field.data)s)'
+        ).substitute(table = field.label), { 'entry': field.data })
 
     return _check_db
+
+class UploadForm(Form):
+    organism = SelectField('organism',  [validators.InputRequired(), check_against_db()])
+    sample_type = SelectField('sample_types', [validators.InputRequired(), check_against_db ()])
+    experiment_type = SelectField('experiment_typea', [validators.InputRequired(), check_against_db()])
+    cell_line = SelectField('cell_lines', [validators.Optional(), check_against_db()])
+    inhibitor = SelectField('inhibitors', [validators.Optional(), check_against_db()])
+    probe = SelectField('probes', [validators.Optional(), check_against_db()])
+    username = TextField('users', [validators.InputRequired(), check_against_db()])
+    dataset_name = TextField('Dataset Name', [validators.InputRequired()])
+    description = TextAreaField('Decription', [validators.InputRequired()])

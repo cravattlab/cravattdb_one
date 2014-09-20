@@ -1,6 +1,6 @@
 from flask import Flask, request, send_file
 from werkzeug import FileStorage
-from upload import Experiment
+from models.upload import Experiment
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -16,7 +16,7 @@ def index():
         file = request.files['file']
 
         # Validate that what we have been supplied with is infact a file
-        if file.filename && isinstance(file, FileStorage):
+        if file.filename and isinstance(file, FileStorage):
             experiment = Experiment(file, request.form)
             status = experiment.process()
 

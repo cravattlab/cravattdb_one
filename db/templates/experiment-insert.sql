@@ -1,5 +1,5 @@
 INSERT INTO $table VALUES (
-    DEFAULT
+    DEFAULT,
     %(peptide_index)s,
     %(ipi)s,
     %(description)s,
