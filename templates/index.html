@@ -22,7 +22,7 @@
     <div class="container" role="main" ng-controller="AddController as add" >
         <button id="add" class="btn btn-default btn-lg" ng-click="showAddForm = true; hideAddButton = true" ng-hide="hideAddButton">Add dataset</button>
         <div id="new-dataset" ng-show="showAddForm">
-            <form class="form-horizontal">
+            <form ng-submit="addDataset()" class="form-horizontal">
             <fieldset>
 
             <!-- Form Name -->
@@ -117,7 +117,7 @@
             <div class="form-group">
               <label class="col-md-4 control-label" for="upload"></label>
               <div class="col-md-8">
-                <button id="upload" ng-click="addDataset(data)" name="upload" class="btn btn-success">Upload</button>
+                <button id="upload" name="upload" class="btn btn-success" type="submit">Upload</button>
                 <button id="cancel" ng-click="hideAddButton = false; showAddForm = false" name="cancel" class="btn btn-warning">Cancel</button>
               </div>
             </div>

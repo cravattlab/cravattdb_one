@@ -7,9 +7,13 @@ app.controller('ListController', ['$scope', function($scope) {
 }]);
 
 app.controller('AddController', ['$scope', 'FileUploader', function($scope, FileUploader) {
-    $scope.uploader = new FileUploader();
+    var uploader = $scope.uploader = new FileUploader();
 
-    $scope.addDataset = function(data) {
-        console.log(data);
+    uploader.onBeforeUploadItem = function(item) {
+        item.formData = [ $scope.data ];
+    }
+
+    $scope.addDataset = function() {
+        uploader.uploadAll();
     }
 }]);
