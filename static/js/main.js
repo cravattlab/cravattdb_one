@@ -1,6 +1,16 @@
 'use strict';
 
-var app = angular.module('cravattdb', ['angularFileUpload']);
+var app = angular.module('cravattdb', ['ngRoute', 'angularFileUpload']);
+
+app.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+    $routeProvider.when('/add', {
+        templateUrl: '/static/partials/add.html',
+        controller: 'AddController',
+        controllerAs: 'add'
+    });
+
+    $locationProvider.html5Mode(true);
+}]);
 
 app.controller('ListController', ['$scope', function($scope) {
 
