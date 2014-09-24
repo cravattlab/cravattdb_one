@@ -17,6 +17,8 @@ class Experiment:
         #     # do something if form is not valid
         #     print 'Form was not valid'
 
+        form.validate()
+
         # then we get a name for our experiment
         name = self.__get_experiment_name()
 
@@ -26,6 +28,23 @@ class Experiment:
 
 
     def __insert_experiment(self, name):
+        '''
+            INSERT INTO experiments (user_id, experiment_type, sample_type, organism_id, cell_line, probe_id, inhibitor_id, name, description)
+            VALUES (
+                form.username,
+                form.experiment_type,
+                form.sample_type,
+                form.organism,
+                form.cell_line
+                form.probe,
+                form.inhibitor,
+                form.name,
+                form.description
+            )
+
+
+        '''
+
         return True
 
     def __insert_data(self, name):

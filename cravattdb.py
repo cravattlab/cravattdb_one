@@ -8,8 +8,12 @@ DEBUG = True
 # add this so that flask doesn't swallow error messages
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
-@app.route('/', methods = ['GET', 'POST'])
+@app.route('/')
 def index():
+    return send_file('templates/index.html')
+
+@app.route('/add', methods = ['GET', 'POST'])
+def add():
     if request.method == 'GET':
         return send_file('templates/index.html')
     else:
