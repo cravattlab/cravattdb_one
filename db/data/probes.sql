@@ -1,3 +1,3 @@
 INSERT INTO probes (name, structure) VALUES
-    ('Iodocetamide Alkyne', ''),
+    ('iodocetamide alkyne', ''),
     ('FP-Rhodamine', '');

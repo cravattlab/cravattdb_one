@@ -1,3 +1,3 @@
-INSERT INTO experiment_types (id, name, description) VALUES
+INSERT INTO experiment_types (name, description) VALUES
     ('isoTOPP-ABPP', ''),
     ('MUDPITT', '');
