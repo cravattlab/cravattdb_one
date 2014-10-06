@@ -16,7 +16,8 @@ class Experiments:
         for item in data:
             results[camelize(item, False)] = {
                 'label' : singularize(titleize(item)),
-                'data': data[item]
+                'data': data[item],
+                'name': singularize(item.lower())
             }
 
         return results
@@ -24,12 +25,12 @@ class Experiments:
     def fetch_all(self):
         tables = [
             'cell_lines',
+            'sample_types',
             'experiment_types',
             'inhibitors',
             'organisms',
             'probes',
-            'users',
-            'sample_types'
+            'users'
         ]
 
         results = {}
@@ -42,7 +43,6 @@ class Experiments:
         self.__db.connection.commit()
         self.__db.close()
 
-        print results
         return results
 
 class Experiment:
@@ -59,33 +59,40 @@ class Experiment:
         #     # do something if form is not valid
         #     print 'Form was not valid'
 
-        form.validate()
+        # form.validate()       
+
+        id = self.__insert_experiment()
 
         # then we get a name for our experiment
-        name = self.__get_experiment_name()
+        name = self.__get_experiment_name(id)
 
         # and insert the experimental data
         self.__insert_data(name)
-        self.__insert_experiment(name)
+
+        self.__db.connection.commit()
+        self.__db.close()
 
 
-    def __insert_experiment(self, name):
-        '''
-            INSERT INTO experiments (user_id, experiment_type, sample_type, organism_id, cell_line, probe_id, inhibitor_id, name, description)
-            VALUES (
-                form.username,
-                form.experiment_type,
-                form.sample_type,
-                form.organism,
-                form.cell_line
-                form.probe,
-                form.inhibitor,
-                form.name,
-                form.description
-            )
-        '''
+    def __insert_experiment(self):
+        with open('db/templates/experiments-insert.sql') as insert_template:
+            insert_sql = insert_template.read()
 
-        return True
+        form = self.__form
+
+        values = {
+            'username' : form['user'],
+            'experiment_type' : form['experiment_type'],
+            'sample_type' : form['sample_type'],
+            'organism' : form['organism'],
+            'cell_line' : form['cell_line'],
+            'probe' : form['probe'],
+            'inhibitor' : form['inhibitor'],
+            'name' : form['name'],
+            'description' : form['description']
+        }
+
+        self.__db.cursor.execute(insert_sql, values)
+        return self.__db.cursor.fetchone()[0]
 
     def __insert_data(self, name):
         # create table that we're going to insert into
@@ -126,10 +133,5 @@ class Experiment:
 
             self.__db.cursor.execute(insert_sql, values)
 
-        self.__db.connection.commit()
-        self.__db.close()
-
-    def __get_experiment_name(self):
-        # temporary name for testing
-        # need to establish a naming scheme for future
-        return 'test'
+    def __get_experiment_name(self, id):
+        return 'experiment_' + str(id)

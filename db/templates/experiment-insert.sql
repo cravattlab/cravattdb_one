@@ -19,4 +19,4 @@ INSERT INTO $table VALUES (
     %(rsquared)s,
     %(entry)s,
     %(link)s
-)
+);

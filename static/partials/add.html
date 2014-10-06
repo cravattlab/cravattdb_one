@@ -5,9 +5,9 @@
     <legend>New Dataset</legend>
 
     <div class="form-group" ng-repeat="item in add.bootstrap">
-        <label class="col-md-4 control-label" for="organism">{{ item.label }}</label>
+        <label class="col-md-4 control-label" for="{{ item.name }}">{{ item.label }}</label>
         <div class="col-md-5">
-            <select id="organism" ng-model="data.organism" name="organism" class="form-control">
+            <select id="item.name" ng-model="data[item.name]" name="{{ item.name }}" class="form-control">
                 <option ng-repeat="i in item.data" value="{{ i.id }}">{{ i.name }}</option>
             </select>
         </div>

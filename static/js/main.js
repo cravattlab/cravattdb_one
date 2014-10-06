@@ -19,8 +19,10 @@ app.controller('ListController', ['$scope', function($scope) {
 }]);
 
 app.controller('AddController', ['$scope', 'FileUploader', 'bootstrap', function($scope, FileUploader, bootstrap) {
-    var uploader = $scope.uploader = new FileUploader();
+    var uploader = $scope.uploader = new FileUploader({ url : '/add' });
 
+    this.bootstrap = bootstrap;
+    $scope.data = {};
 
     uploader.onBeforeUploadItem = function(item) {
         item.formData = [ $scope.data ];
@@ -29,6 +31,4 @@ app.controller('AddController', ['$scope', 'FileUploader', 'bootstrap', function
     $scope.addDataset = function() {
         uploader.uploadAll();
     }
-
-    this.bootstrap = bootstrap;
 }]);
