@@ -2,6 +2,48 @@ from db.db import Database
 from uploadForm import UploadForm
 from string import Template
 from csv import reader
+from inflection import camelize, singularize, titleize
+
+class Experiments:
+    def __init__(self):
+        self.__db = Database()
+
+    def bootstrap(self):
+        data = self.fetch_all();
+
+        results = {}
+
+        for item in data:
+            results[camelize(item, False)] = {
+                'label' : singularize(titleize(item)),
+                'data': data[item]
+            }
+
+        return results
+
+    def fetch_all(self):
+        tables = [
+            'cell_lines',
+            'experiment_types',
+            'inhibitors',
+            'organisms',
+            'probes',
+            'users',
+            'sample_types'
+        ]
+
+        results = {}
+
+        for table in tables:
+            sql = 'SELECT * FROM {0}'.format(table)
+            self.__db.dict_cursor.execute(sql)
+            results[table] = self.__db.dict_cursor.fetchall()
+
+        self.__db.connection.commit()
+        self.__db.close()
+
+        print results
+        return results
 
 class Experiment:
     def __init__(self, file, form):
@@ -41,8 +83,6 @@ class Experiment:
                 form.name,
                 form.description
             )
-
-
         '''
 
         return True

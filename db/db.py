@@ -1,4 +1,4 @@
-import psycopg2, config
+import psycopg2, psycopg2.extras, config
 
 class Database:
     def __init__(self):
@@ -9,6 +9,10 @@ class Database:
         )
 
         self.cursor = self.connection.cursor()
+
+        self.dict_cursor = self.connection.cursor(
+            cursor_factory = psycopg2.extras.RealDictCursor
+        )
 
     def close(self):
         self.cursor.close()

@@ -1,6 +1,6 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, render_template, json
 from werkzeug import FileStorage
-from models.upload import Experiment
+from models.upload import Experiment, Experiments
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -10,12 +10,13 @@ app.config['PROPAGATE_EXCEPTIONS'] = True
 
 @app.route('/')
 def index():
-    return send_file('templates/index.html')
+    return render_template('index.html')
 
 @app.route('/add', methods = ['GET', 'POST'])
 def add():
     if request.method == 'GET':
-        return send_file('templates/index.html')
+        experiments = Experiments()
+        return render_template('index.html', bootstrap = json.dumps(experiments.bootstrap()))
     else:
         file = request.files['file']
 

@@ -8,12 +8,17 @@
     <!-- Bootstrap theme -->
     <link href="/static/bower_components/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="/static/css/main.css" type="text/css" rel="stylesheet" />
-
     <!-- bower:js -->
     <script src="/static/bower_components/angular/angular.js"></script>
     <script src="/static/bower_components/angular-route/angular-route.js"></script>
     <script src="/static/bower_components/angular-file-upload/angular-file-upload.js"></script>
     <!-- endinject -->
+
+    <!-- bootstrapping code for application -->
+    <!-- not to be confused with actual Bootstrap above lol -->
+    {% if bootstrap %}
+    <script type="text/javascript">window.bootstrap = {{ bootstrap | safe }};</script>
+    {% endif %}
 
     <script src="/static/js/main.js" type="text/javascript"></script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->

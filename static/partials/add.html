@@ -1,69 +1,16 @@
 <button id="add" class="btn btn-default btn-lg" ng-click="showAddForm = true; hideAddButton = true" ng-hide="hideAddButton">Add dataset</button>
-<div id="new-dataset" ng-show="showAddForm">
+<div id="new-dataset" ng-show="true">
     <form ng-submit="addDataset()" class="form-horizontal">
     <fieldset>
-
-    <!-- Form Name -->
     <legend>New Dataset</legend>
 
-    <!-- Select Basic -->
-    <div class="form-group">
-      <label class="col-md-4 control-label" for="organism">Organism</label>
-      <div class="col-md-5">
-        <select id="organism" ng-model="data.organism" name="organism" class="form-control">
-          <option value="human">Human</option>
-          <option value="mouse">Mouse</option>
-          <option value="yeast">Yeast</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Select Basic -->
-    <div class="form-group">
-      <label class="col-md-4 control-label" for="sample-type">Sample Type</label>
-      <div class="col-md-5">
-        <select id="sample-type" ng-model="data.sampleType" name="sample-type" class="form-control">
-          <option value="cells">Cells</option>
-          <option value="tissue">Tissue</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Select Basic -->
-    <div class="form-group">
-      <label class="col-md-4 control-label" for="isotope-type">Isotope Type</label>
-      <div class="col-md-5">
-        <select id="isotope-type" ng-model="data.isotopeType" name="isotope-type" class="form-control">
-          <option value="isotopp-abpp">isoTOPP ABPP</option>
-          <option value="silac">SILAC</option>
-          <option value="n15">N15</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Select Basic -->
-    <div class="form-group">
-      <label class="col-md-4 control-label" for="probe">Probe</label>
-      <div class="col-md-5">
-        <select id="probe" name="probe" ng-model="data.probe" class="form-control">
-          <option value="ia">IA</option>
-          <option value="fp">FP</option>
-          <option value="su">SU</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Text input-->
-    <div class="form-group">
-      <label class="col-md-4 control-label" for="username">Your username</label>  
-      <div class="col-md-5">
-      <input id="username" name="username" ng-model="data.username" type="text" placeholder="" class="form-control input-md">
-      <span class="help-block">Enter your Avatar username</span>  
-      </div>
+    <div class="form-group" ng-repeat="item in add.bootstrap">
+        <label class="col-md-4 control-label" for="organism">{{ item.label }}</label>
+        <div class="col-md-5">
+            <select id="organism" ng-model="data.organism" name="organism" class="form-control">
+                <option ng-repeat="i in item.data" value="{{ i.id }}">{{ i.name }}</option>
+            </select>
+        </div>
     </div>
 
     <!-- Text input-->
@@ -85,7 +32,7 @@
 
     <!-- File Button --> 
     <div class="form-group">
-      <label class="col-md-4 control-label" for="file">Data flle</label>
+      <label class="col-md-4 control-label" for="file">Data file</label>
       <div class="col-md-4">
         <input id="file" ng-model="data.file" nv-file-select uploader="uploader" name="file" class="input-file" type="file">
       </div>
