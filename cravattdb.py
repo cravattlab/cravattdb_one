@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template, json
 from werkzeug import FileStorage
 from models.upload import Experiment, Experiments
+from models.list import List
+from models.dataset import Dataset
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -28,6 +30,19 @@ def add():
             file.close()
 
         return ''
+
+@app.route('/list')
+def list():
+    return render_template('index.html', bootstrap = json.dumps(List().bootstrap()))
+
+@app.route('/dataset/<int:experiment_id>')
+def dataset(experiment_id):
+    dataset = Dataset(experiment_id)
+
+    return render_template(
+        'index.html',
+        bootstrap = json.dumps(dataset.bootstrap())
+    )
 
 if __name__ == "__main__":
     app.run()

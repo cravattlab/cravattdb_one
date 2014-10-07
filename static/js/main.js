@@ -9,13 +9,32 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
         templateUrl: '/static/partials/add.html',
         controller: 'AddController',
         controllerAs: 'add'
+    })
+    .when('/list', {
+        templateUrl: '/static/partials/list.html',
+        controller: 'ListController',
+        controllerAs: 'list' 
+    })
+    .when('/dataset/:id', {
+        templateUrl: '/static/partials/dataset.html',
+        controller: 'DatasetController',
+        controllerAs: 'dataset'
     });
 
     $locationProvider.html5Mode(true);
 }]);
 
-app.controller('ListController', ['$scope', function($scope) {
 
+app.controller('DatasetController', ['$scope', 'bootstrap', function($scope, bootstrap) {
+    this.bootstrap = bootstrap;
+}]);
+
+app.controller('ListController', ['$scope', 'bootstrap', function($scope, bootstrap) {
+    this.bootstrap = bootstrap;
+
+    this.showDataset = function(id) {
+        console.log('show dataset', arguments, id);
+    }
 }]);
 
 app.controller('AddController', ['$scope', 'FileUploader', 'bootstrap', function($scope, FileUploader, bootstrap) {

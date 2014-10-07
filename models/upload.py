@@ -46,8 +46,8 @@ class Experiments:
         return results
 
 class Experiment:
-    def __init__(self, file, form):
-        self.__file = file
+    def __init__(self, experiment_file, form):
+        self.__file = experiment_file
         self.__form = form
         self.__db = Database()
 

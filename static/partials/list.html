@@ -1,1 +1,12 @@
-<ul ng-controller="ListController as list"></ul>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th ng-repeat="heading in list.bootstrap.headers">{{ heading }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in list.bootstrap.data">
+            <td ng-repeat="column in row" ng-click="list.showDataset(row[0])">{{ column }}</td>
+        </tr>
+    </tbody>
+</table>
