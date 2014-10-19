@@ -6,6 +6,7 @@ from models.dataset import Dataset
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.debug = True
 DEBUG = True
 # add this so that flask doesn't swallow error messages
 app.config['PROPAGATE_EXCEPTIONS'] = True
@@ -35,6 +36,10 @@ def add():
 def list():
     return render_template('index.html', bootstrap = json.dumps(List().bootstrap()))
 
+@app.route('/api/list')
+def list_api():
+    return json.dumps(List().bootstrap())
+
 @app.route('/dataset/<int:experiment_id>')
 def dataset(experiment_id):
     dataset = Dataset(experiment_id)
@@ -43,6 +48,10 @@ def dataset(experiment_id):
         'index.html',
         bootstrap = json.dumps(dataset.bootstrap())
     )
+
+@app.route('/api/dataset/<int:experiment_id>')
+def dataset_api(experiment_id):
+    return json.dumps(Dataset(experiment_id).bootstrap())
 
 if __name__ == "__main__":
     app.run()

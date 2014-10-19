@@ -11,6 +11,9 @@
     <!-- bower:js -->
     <script src="/static/bower_components/angular/angular.js"></script>
     <script src="/static/bower_components/angular-route/angular-route.js"></script>
+    <script src="/static/bower_components/underscore/underscore.js"></script>
+    <script src="/static/bower_components/angular-bindonce/bindonce.js"></script>
+    <script src="/static/bower_components/angular-resource/angular-resource.js"></script>
     <script src="/static/bower_components/angular-file-upload/angular-file-upload.js"></script>
     <!-- endinject -->
     {% if bootstrap %}
@@ -26,9 +29,15 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body ng-app="cravattdb" role="document">
+<body ng-app="cravattdb" class="container" role="document" role="main">
+    <header>
+        <ul class="nav nav-pills">
+            <li class="active"><a href="/#">Home</a></li>
+            <li><a href="/#list">List</a></li>
+        </ul>
+    </header>
 
-    <div ng-view class="container" role="main"></div>
+    <div ng-view></div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

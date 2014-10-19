@@ -5,7 +5,9 @@ class List:
         self.__db = Database()
 
     def bootstrap(self):
-        return self.fetch_all()
+        return {
+            'list': self.fetch_all()
+        }
 
     def fetch_all(self):
         results = {}

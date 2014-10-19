@@ -1,11 +1,19 @@
+<pre>
+List info:
+predicate: {{list.predicate}}
+reverse: {{ list.reverse }}
+search: {{list.search}}
+</pre>
+
+<input id="search" type="text" ng-model="list.search" />
 <table class="table table-striped table-hover">
     <thead>
         <tr>
-            <th ng-repeat="heading in list.bootstrap.headers">{{ heading }}</th>
+            <th ng-repeat="heading in list.bootstrap.headers" ng-click="list.predicate = $index; list.reverse = !list.reverse">{{ heading }}</th>
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="row in list.bootstrap.data">
+        <tr ng-repeat="row in list.bootstrap.data  | filter:list.search | orderBy: list.sorter:list.reverse">
             <td ng-repeat="column in row" ng-click="list.showDataset(row[0])">{{ column }}</td>
         </tr>
     </tbody>

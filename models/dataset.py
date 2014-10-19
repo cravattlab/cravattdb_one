@@ -6,12 +6,14 @@ class Dataset:
         self.id = id
 
     def bootstrap(self):
-        return self.fetch_dataset()
+        return {
+            'dataset': self.fetch_dataset()
+        }
 
     def fetch_dataset(self):
         results = {}
 
-        sql = 'SELECT * FROM {0} GROUP by ipi'.format('experiment_' + str(self.id))
+        sql = 'SELECT peptide_index, ipi, symbol, sequence, ratio FROM {0}'.format('experiment_' + str(self.id))
 
         self.__db.cursor.execute(sql)
         self.__db.connection.commit()
