@@ -18,8 +18,7 @@ def index():
 @app.route('/add', methods = ['GET', 'POST'])
 def add():
     if request.method == 'GET':
-        experiments = Experiments()
-        return render_template('index.html', bootstrap = json.dumps(experiments.bootstrap()))
+        return render_template('index.html', bootstrap = json.dumps(Experiments().bootstrap()))
     else:
         file = request.files['file']
 
@@ -52,6 +51,14 @@ def dataset(experiment_id):
 @app.route('/api/dataset/<int:experiment_id>')
 def dataset_api(experiment_id):
     return json.dumps(Dataset(experiment_id).bootstrap())
+
+@app.route('/api/add', methods=['GET'])
+def add_api():
+    return json.dumps(Experiments().bootstrap())
+
+@app.route('/test')
+def test():
+    return('<img src="file:///localhost/c:/Users/Radu/Desktop/wp_ss_20130927_0001.png" width="100px" height="100px" />') 
 
 if __name__ == "__main__":
     app.run()

@@ -13,7 +13,7 @@ class Dataset:
     def fetch_dataset(self):
         results = {}
 
-        sql = 'SELECT peptide_index, ipi, symbol, sequence, ratio FROM {0}'.format('experiment_' + str(self.id))
+        sql = 'SELECT peptide_index, ipi, symbol, sequence, mass, charge, segment, ratio FROM {0}'.format('experiment_' + str(self.id))
 
         self.__db.cursor.execute(sql)
         self.__db.connection.commit()

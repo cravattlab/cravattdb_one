@@ -1,5 +1,4 @@
-<button id="add" class="btn btn-default btn-lg" ng-click="showAddForm = true; hideAddButton = true" ng-hide="hideAddButton">Add dataset</button>
-<div id="new-dataset" ng-show="true">
+<div id="new-dataset">
     <form ng-submit="addDataset()" class="form-horizontal">
     <fieldset>
     <legend>New Dataset</legend>
@@ -43,7 +42,7 @@
       <label class="col-md-4 control-label" for="upload"></label>
       <div class="col-md-8">
         <button id="upload" name="upload" class="btn btn-success" type="submit">Upload</button>
-        <button id="cancel" ng-click="hideAddButton = false; showAddForm = false" name="cancel" class="btn btn-warning">Cancel</button>
+        <button id="cancel" name="cancel" class="btn btn-warning">Cancel</button>
       </div>
     </div>
 

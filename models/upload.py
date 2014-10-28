@@ -20,7 +20,9 @@ class Experiments:
                 'name': singularize(item.lower())
             }
 
-        return results
+        return {
+            'add': results
+        }
 
     def fetch_all(self):
         tables = [

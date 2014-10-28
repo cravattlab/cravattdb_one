@@ -8,13 +8,19 @@
     <!-- Bootstrap theme -->
     <link href="/static/bower_components/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="/static/css/main.css" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/bower_components/datatables/media/css/jquery.dataTables.css">
+    <!-- bower:css -->
+    <!-- endinject -->
+    <!-- Not loading datatables scripts with gulp-inject since order is important here -->
+    <script src="/static/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/static/bower_components/datatables/media/js/jquery.dataTables.js"></script>
     <!-- bower:js -->
     <script src="/static/bower_components/angular/angular.js"></script>
     <script src="/static/bower_components/angular-route/angular-route.js"></script>
-    <script src="/static/bower_components/underscore/underscore.js"></script>
     <script src="/static/bower_components/angular-bindonce/bindonce.js"></script>
     <script src="/static/bower_components/angular-resource/angular-resource.js"></script>
     <script src="/static/bower_components/angular-file-upload/angular-file-upload.js"></script>
+    <script src="/static/bower_components/angular-datatables/dist/angular-datatables.js"></script>
     <!-- endinject -->
     {% if bootstrap %}
     <!-- bootstrapping code for application -->
@@ -30,17 +36,19 @@
     <![endif]-->
 </head>
 <body ng-app="cravattdb" class="container" role="document" role="main">
-    <header>
-        <ul class="nav nav-pills">
-            <li class="active"><a href="/#">Home</a></li>
-            <li><a href="/#list">List</a></li>
-        </ul>
+    <header ng-controller="NavController as nav">
+        <nav class="navbar navbar-default" role="navigation">
+            <a class="navbar-brand" href="#">CravattLab DB<sup>&copy;</sup></a>
+            <ul class="nav nav-pills navbar-nav">
+                <li ng-class="nav.classes('/')"><a href="/#">Home</a></li>
+                <li ng-class="nav.classes('/list')"><a href="/#list">List</a></li>
+                <li ng-class="nav.classes('/add')"><a href="/#add">Add dataset</a></li>
+            </ul>
+        </nav>
     </header>
 
     <div ng-view></div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Compiled Bootstrap javascript files -->
     <script src="/static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 </body>
