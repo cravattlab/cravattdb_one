@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('cravattdb', ['ngRoute', 'ngResource', 'angularFileUpload', 'pasvaz.bindonce', 'datatables']);
+var app = angular.module('cravattdb', ['ngRoute', 'ngResource', 'angularFileUpload', 'pasvaz.bindonce', 'datatables', 'ui-rangeSlider']);
 
 app.value('bootstrap', window.bootstrap || {});
 
@@ -41,6 +41,10 @@ app.controller('DatasetController', [
     'DTColumnBuilder',
     '$resource',
 function($scope, bootstrap, $http, $routeParams, DTOptionsBuilder, DTColumnBuilder, $resource) {
+
+    this.ratioMin = 0;
+    this.ratioMax = 20;
+
     this.dtOptions = DTOptionsBuilder
         .fromSource('/api/dataset/' + $routeParams.id)
         .withFnServerData(function (sSource, aoData, fnCallback, oSettings) {
@@ -153,6 +157,44 @@ function($scope, bootstrap, $http, $routeParams, DTOptionsBuilder, DTColumnBuild
         }
         return columns;
     }
+
+    var self = this;
+
+
+    $scope.$on('event:dataTableLoaded', function(event, loadedDT) {
+        // loadedDT.DataTable is the DataTable API instance
+        // loadedDT.dataTable is the jQuery Object
+        // See http://datatables.net/manual/api#Accessing-the-API
+        self.loadedDT = loadedDT;
+
+
+
+        $scope.$watch('dataset.ratioMin', _.debounce(function(newValue, oldValue) {
+            self.loadedDT.DataTable.draw();
+        }, 200));
+
+        $scope.$watch('dataset.ratioMax', _.debounce(function(newValue, oldValue) {
+            self.loadedDT.DataTable.draw();
+        }, 200));
+    });
+
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+            var min = self.ratioMin;
+            var max = self.ratioMax;
+            console.log(min, max);
+            var ratio = parseFloat( data[8] ) || 0; // use data for the ratio column
+     
+            if ( ( isNaN( min ) && isNaN( max ) ) ||
+                 ( isNaN( min ) && ratio <= max ) ||
+                 ( min <= ratio   && isNaN( max ) ) ||
+                 ( min <= ratio   && ratio <= max ) )
+            {
+                return true;
+            }
+            return false;
+        }
+    );
 }]);
 
 app.controller('ListController', ['$scope', 'bootstrap', '$location', '$resource', '$http', function($scope, bootstrap, $location, $resource, $http) {

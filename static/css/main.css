@@ -4,10 +4,27 @@ pre:first-of-type {
 header {
     margin-bottom:10px;
 }
-.grid {
 
+
+#controls {
+    /*float:right;*/
 }
+
+#grouping-group {
+    float:left;
+}
+#ratio-group {
+    float:right;
+}
+#ratioRange { 
+    width:300px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 20px;
+}
+
 tr.group,
 tr.group:hover {
     background-color: #ddd !important;
 }
+
