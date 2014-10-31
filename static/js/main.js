@@ -41,16 +41,70 @@ app.controller('DatasetController', [
     'DTColumnBuilder',
     '$resource',
 function($scope, bootstrap, $http, $routeParams, DTOptionsBuilder, DTColumnBuilder, $resource) {
-
-
     this.dtOptions = DTOptionsBuilder
         .fromSource('/api/dataset/' + $routeParams.id)
-        .withDataProp('dataset.data')
+        .withFnServerData(function (sSource, aoData, fnCallback, oSettings) {
+            oSettings.jqXHR = $.ajax({
+                'dataType': 'json',
+                'url': sSource,
+                'data': aoData,
+                'success': function(data) {
+                    data = orderData(data.dataset.data);
+                    // le monkey patch
+                    fnCallback.call(this, data);
+                }
+            });
+        })
         .withBootstrap();
+
+    function orderData(data) {
+        var lastId,
+            lastIndex = 0,
+            ratios = [];
+
+        function mean(arr) {
+            var sum = 0;
+            for (var i = 0, n = arr.length; i < n; i++) {
+                sum += arr[i];
+            }
+            return sum/arr.length;
+        }
+
+        // sort data based on UniprotKB identifier
+        // for grouping by protein
+        data.sort(function(a, b) {
+            if (a[1] > b[1]) return 1;
+            else if (a[1] < b[1]) return -1;
+            else return 0;
+        }).forEach(function(item, i, arr) {
+            // new group
+            if (lastId !== item[1]) {
+                // add mean ratio to each row of previous group
+                for (; lastIndex < i; lastIndex++) {
+                    arr[lastIndex].push(mean(ratios));
+                }
+
+                // reset ratios
+                ratios = [ item[7] ];
+                // implicit lastIndex = i;
+            // same group so keep adding to ratios    
+            } else {
+                ratios.push(item[7]);
+            }
+
+            lastId = item[1];
+        });
+
+        for (; lastIndex < data.length; lastIndex++) {
+            data[lastIndex].push(mean(ratios));
+        }
+
+        return data;
+    }
 
     setDefaults(this.dtOptions);
 
-    this.dtOptions.aoColumns = extractColumns(["peptide_index", "ipi", "symbol", "sequence", "mass", "charge", "segment", "ratio"]);
+    this.dtOptions.aoColumns = extractColumns(["peptide_index", "ipi", "symbol", "sequence", "mass", "charge", "segment", "ratio", "meanRatio"]);
 
     function setDefaults(options) {
         options.pageLength = 25;
@@ -58,6 +112,38 @@ function($scope, bootstrap, $http, $routeParams, DTOptionsBuilder, DTColumnBuild
         options.autoWidth = true;
         options.lengthMenu = [ [10, 25, 50, -1], [10, 25, 50, "All"] ];
         options.deferRender = true;
+        options.order = [[ 8, 'desc' ]],
+        options.columnDefs = [{
+            'visible': false,
+            'targets': [1, 2, 8]
+        }];
+
+        options.fnDrawCallback = function (settings) {
+            var api = this.api();
+            var rows = api.rows( {page:'current'} );
+            var rowsNodes = rows.nodes();
+            var rowsData = rows.data();
+            var last = null;
+
+            // if (api.order() !== 2) return;
+ 
+            api.column(1, {page:'current'} ).data().each( function ( group, i ) {
+                var row = rowsData[i],
+                    symbol = row[2],
+                    meanRatio = row[8];
+
+                // starting a new group
+                if ( last !== group ) {
+                    $(['<tr class="group">',
+                        '<td colspan="1">', group, '</td>',
+                        '<td colspan="4">', symbol, '</td>',
+                        '<td colspan="1">', meanRatio.toFixed(2), '</td>',
+                    '</tr>'].join('')).insertBefore($(rowsNodes).eq(i));
+ 
+                    last = group;
+                }
+            });
+        }
     }
 
     function extractColumns(headers) {
