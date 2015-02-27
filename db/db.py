@@ -5,7 +5,8 @@ class Database:
         self.connection = psycopg2.connect(
             database = config.PGSQL_DATABASE_NAME,
             user = config.PGSQL_DATABASE_USER,
-            password = config.PGSQL_DATABASE_PASSWORD
+            password = config.PGSQL_DATABASE_PASSWORD,
+            hostname = config.PGSQL_DATABASE_HOSTNAME
         )
 
         self.cursor = self.connection.cursor()
