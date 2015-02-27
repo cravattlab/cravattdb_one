@@ -6,7 +6,7 @@ class Database:
             database = config.PGSQL_DATABASE_NAME,
             user = config.PGSQL_DATABASE_USER,
             password = config.PGSQL_DATABASE_PASSWORD,
-            hostname = config.PGSQL_DATABASE_HOSTNAME
+            host = config.PGSQL_DATABASE_HOSTNAME
         )
 
         self.cursor = self.connection.cursor()
