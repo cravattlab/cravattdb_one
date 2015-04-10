@@ -3,6 +3,7 @@ from werkzeug import FileStorage
 from models.upload import Experiment, Experiments
 from models.list import List
 from models.dataset import Dataset
+from models.uploadRaw import UploadRaw
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -14,6 +15,13 @@ app.config['PROPAGATE_EXCEPTIONS'] = True
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/upload', methods = [ 'POST' ])
+def upload():
+    file = request.files['file']
+    uploader = UploadRaw(file)
+    uploader.move()
+    return 'hi'
 
 @app.route('/add', methods = ['GET', 'POST'])
 def add():
@@ -61,4 +69,4 @@ def test():
     return('<img src="file:///localhost/c:/Users/Radu/Desktop/wp_ss_20130927_0001.png" width="100px" height="100px" />') 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0')

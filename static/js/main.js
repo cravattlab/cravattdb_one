@@ -6,7 +6,11 @@ app.value('bootstrap', window.bootstrap || {});
 
 app.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
-    $routeProvider.when('/add', {
+    $routeProvider.when('/', {
+        templateUrl: '/static/partials/index.html',
+        controller: 'MainController',
+        controllerAs: 'main'
+    }).when('/add', {
         templateUrl: '/static/partials/add.html',
         controller: 'AddController',
         controllerAs: 'add'
@@ -21,6 +25,32 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
         controller: 'DatasetController',
         controllerAs: 'dataset'
     });
+
+}]);
+
+app.controller('MainController', ['$scope', '$http', 'FileUploader', function($scope, $http, FileUploader) {
+    console.log('test');
+
+    this.uploadCompleted = false;
+
+    var uploader = $scope.uploader = new FileUploader({ url: '/upload' });
+
+    uploader.onCompleteItem = function(fileItem, response, status, headers) {
+        console.info('onCompleteItem', fileItem, response, status, headers);
+    };
+    uploader.onCompleteAll = function() {
+        console.info('onCompleteAll');
+        this.uploadCompleted = true;
+    };
+
+    this.convert = function() {
+        console.log('converting files');
+        $http.get('http://192.168.56.102:5000').success(function() {
+            console.log('hello')
+        }.bind(this));
+    }
+
+
 
 }]);
 
@@ -166,8 +196,6 @@ function($scope, bootstrap, $http, $routeParams, DTOptionsBuilder, DTColumnBuild
         // loadedDT.dataTable is the jQuery Object
         // See http://datatables.net/manual/api#Accessing-the-API
         self.loadedDT = loadedDT;
-
-
 
         $scope.$watch('dataset.ratioMin', _.debounce(function(newValue, oldValue) {
             self.loadedDT.DataTable.draw();
