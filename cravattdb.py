@@ -4,13 +4,12 @@ from models.upload import Experiment, Experiments
 from models.list import List
 from models.dataset import Dataset
 from models.uploadRaw import UploadRaw
+import config
 
 app = Flask(__name__)
-app.config.from_object(__name__)
-app.debug = True
-DEBUG = True
-# add this so that flask doesn't swallow error messages
-app.config['PROPAGATE_EXCEPTIONS'] = True
+
+app.config['DEBUG'] = True
+app.config['PROPAGATE_EXCEPTIONS'] = True # don't swallow error messages
 
 @app.route('/')
 def index():
@@ -19,25 +18,22 @@ def index():
 @app.route('/upload', methods = [ 'POST' ])
 def upload():
     file = request.files['file']
-    uploader = UploadRaw(file)
-    uploader.move()
-    return 'hi'
 
-@app.route('/add', methods = ['GET', 'POST'])
-def add():
+    if file.filename and isinstance(file, FileStorage):
+        uploader = UploadRaw(file)
+        uploader.move()
+        return 'hi'
+
+@app.route('/new', methods=['GET', 'POST'])
+@app.route('/new/<int:experiment_id>', methods=['GET', 'POST'])
+def new(experiment_id=None):
     if request.method == 'GET':
         return render_template('index.html', bootstrap = json.dumps(Experiments().bootstrap()))
     else:
-        file = request.files['file']
-
-        # Validate that what we have been supplied with is infact a file
-        if file.filename and isinstance(file, FileStorage):
-            experiment = Experiment(file, request.form)
-            status = experiment.process()
-
-            file.close()
-
-        return ''
+        if not experiment_id:
+            experiment = Experiment()
+            new_id = experiment.new(request.json)
+            return json.dumps({ 'success': new_id })
 
 @app.route('/list')
 def list():
@@ -56,12 +52,16 @@ def dataset(experiment_id):
         bootstrap = json.dumps(dataset.bootstrap())
     )
 
+@app.route('/api/experiment/<int:experiment_id>')
+def experiment_api(experiment_id):
+    return json.dumps(Experiment().fetch(experiment_id))
+
 @app.route('/api/dataset/<int:experiment_id>')
 def dataset_api(experiment_id):
     return json.dumps(Dataset(experiment_id).bootstrap())
 
-@app.route('/api/add', methods=['GET'])
-def add_api():
+@app.route('/api/new', methods=['GET'])
+def new_api():
     return json.dumps(Experiments().bootstrap())
 
 @app.route('/test')

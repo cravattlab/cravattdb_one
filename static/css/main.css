@@ -1,5 +1,23 @@
+body {
+    min-width:960px;
+}
+
+#sidebar {
+    padding-left:30px;
+    margin-bottom:40px;
+}
+
+#sidebar li {
+    cursor:pointer;
+    font-size:1.4em;
+}
+
+#sidebar li.active {
+    font-weight:bold;
+}
+
 pre:first-of-type {
-    display:none;
+    /*display:none;*/
 }
 header {
     margin-bottom:10px;

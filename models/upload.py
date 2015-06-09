@@ -3,6 +3,7 @@ from uploadForm import UploadForm
 from string import Template
 from csv import reader
 from inflection import camelize, singularize, titleize
+from collections import OrderedDict
 
 class Experiments:
     def __init__(self):
@@ -26,13 +27,10 @@ class Experiments:
 
     def fetch_all(self):
         tables = [
-            'cell_lines',
+            'organisms',
             'sample_types',
             'experiment_types',
-            'inhibitors',
-            'organisms',
-            'probes',
-            'users'
+            'probes'
         ]
 
         results = {}
@@ -48,10 +46,35 @@ class Experiments:
         return results
 
 class Experiment:
-    def __init__(self, experiment_file, form):
-        self.__file = experiment_file
-        self.__form = form
+    def __init__(self):
         self.__db = Database()
+        self.__sql_templates = {
+            'new_experiment': 'db/templates/experiments-insert.sql' 
+        }
+
+    def new(self, data):
+        self.__db.cursor.execute(
+            self.__sql('new_experiment'),
+            data['details']
+        )
+
+        experiment_id = self.__db.cursor.fetchone()[0]
+
+        self.__db.connection.commit()
+        self.__db.close()
+
+        return experiment_id
+
+    def fetch(self, id):
+        self.__db.dict_cursor.execute(
+            'SELECT description, experiment_type, name, organism_id as organism, probe_id as probe, sample_type FROM experiments WHERE experiment_id = %s',
+            (id, )
+        )
+
+        results = self.__db.dict_cursor.fetchone()
+        self.__db.close()
+
+        return results
 
     def process(self):
         # first we validate the form submission
@@ -74,6 +97,9 @@ class Experiment:
         self.__db.connection.commit()
         self.__db.close()
 
+    def __sql(self, template):
+        with open(self.__sql_templates[template]) as f:
+            return f.read()
 
     def __insert_experiment(self):
         with open('db/templates/experiments-insert.sql') as insert_template:

@@ -15,6 +15,11 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
         controller: 'AddController',
         controllerAs: 'add'
     })
+    .when('/new/:id?', {
+        templateUrl: '/static/partials/new.html',
+        controller: 'NewController',
+        controllerAs: 'new'
+    })
     .when('/list', {
         templateUrl: '/static/partials/list.html',
         controller: 'ListController',
@@ -25,16 +30,80 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
         controller: 'DatasetController',
         controllerAs: 'dataset'
     });
-
 }]);
 
-app.controller('MainController', ['$scope', '$http', 'FileUploader', function($scope, $http, FileUploader) {
-    console.log('test');
+app.controller('MainController', ['$scope', function($scope) {
+    console.log('hello world');
+}]);
+
+app.controller('NewController', [
+    '$scope',
+    '$http',
+    '$routeParams',
+    '$timeout',
+    '$location',
+    'FileUploader',
+function($scope, $http, $routeParams, $timeout, $location, FileUploader) {
+    if (bootstrap.add) {
+        this.bootstrap = bootstrap.add;
+    } else {
+        $http.get('/api/add').success(function(data) {
+            this.bootstrap = data.add;
+        }.bind(this));  
+    }
+
+    if ($routeParams.id) {
+        $http.get('/api/experiment/' + $routeParams.id).success(function(data) {
+            this.data.details = data;
+            this.data.experimentId = $routeParams.id;
+        }.bind(this));
+    }
+
+    $scope.stage = function(newStage) {
+        console.log('test');
+        return $location.path(newStage);
+    }
+
+    this.stage = 'details';
+
+    this.data = {
+        id: null,
+        details: {}
+    };
+
+    this.save = function() {
+        $http.post('/new', this.data).success(function(data) {
+            var newId = data.success;
+
+        }.bind(this));
+    };
+
+    this.delete = function() {
+
+    };
+
+    this.next = function($event) {
+        var sidebar = angular.element('#sidebar'),
+            currentIndex = sidebar.find('li.active').index(),
+            els = sidebar.find('li');
+
+        // if we're on the last stage, then loop back to beginning
+        if (currentIndex === els.length - 1) currentIndex = -1;
+
+        $event.stopPropagation();
+        // have to break out of apply loop... annoying
+        $timeout(function() {
+            els.eq(currentIndex + 1).triggerHandler('click');
+        }, 0);
+    };
 
     this.uploadCompleted = false;
-
     var uploader = $scope.uploader = new FileUploader({ url: '/upload' });
 
+
+    uploader.onBeforeUploadItem = function(item) {
+        item.formData = [ this.data.experimentId ];
+    };
     uploader.onCompleteItem = function(fileItem, response, status, headers) {
         console.info('onCompleteItem', fileItem, response, status, headers);
     };
@@ -48,10 +117,7 @@ app.controller('MainController', ['$scope', '$http', 'FileUploader', function($s
         $http.get('http://192.168.56.102:5000').success(function() {
             console.log('hello')
         }.bind(this));
-    }
-
-
-
+    };
 }]);
 
 app.controller('NavController', ['$location', function($location) {

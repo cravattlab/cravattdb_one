@@ -13,7 +13,7 @@ def check_against_db():
 class UploadForm(Form):
     organism = SelectField('organism',  [validators.InputRequired(), check_against_db()])
     sample_type = SelectField('sample_types', [validators.InputRequired(), check_against_db ()])
-    experiment_type = SelectField('experiment_typea', [validators.InputRequired(), check_against_db()])
+    experiment_type = SelectField('experiment_type', [validators.InputRequired(), check_against_db()])
     cell_line = SelectField('cell_lines', [validators.Optional(), check_against_db()])
     inhibitor = SelectField('inhibitors', [validators.Optional(), check_against_db()])
     probe = SelectField('probes', [validators.Optional(), check_against_db()])

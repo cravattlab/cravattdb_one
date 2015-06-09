@@ -3,7 +3,7 @@ from flask import Flask, request, redirect, url_for
 from werkzeug import secure_filename
 
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['raw', 'RAW'])
 
 class UploadRaw:
     def __init__(self, files):

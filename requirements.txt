@@ -1,9 +1,11 @@
 Flask==0.10.1
-Jinja2==2.7.3
-MarkupSafe==0.23
-Werkzeug==0.9.6
-flask-wtf==0.10.2
+Flask-WTF==0.10.2
+gunicorn==19.3.0
 inflection==0.2.1
 itsdangerous==0.24
+Jinja2==2.7.3
+MarkupSafe==0.23
 psycopg2==2.5.4
-wtforms==2.0.1
+SQLAlchemy==1.0.3
+Werkzeug==0.9.6
+WTForms==2.0.1

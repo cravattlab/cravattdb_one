@@ -1,3 +1,6 @@
 INSERT INTO experiment_types (name, description) VALUES
-    ('isoTOPP-ABPP', ''),
-    ('MUDPITT', '');
+    ('SILAC', ''),
+    ('isoTOP', ''),
+    ('N15', ''),
+    ('ReDiMe', ''),
+    ('Other', '');
