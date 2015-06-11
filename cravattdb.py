@@ -18,10 +18,10 @@ def index():
 @app.route('/upload', methods = [ 'POST' ])
 def upload():
     file = request.files['file']
+    experiment_id = request.form.get('experimentId')
 
-    if file.filename and isinstance(file, FileStorage):
-        uploader = UploadRaw(file)
-        uploader.move()
+    if file.filename and isinstance(file, FileStorage) and experiment_id:
+        Experiment().upload_file(file, experiment_id)
         return 'hi'
 
 @app.route('/new', methods=['GET', 'POST'])

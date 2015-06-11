@@ -41,40 +41,55 @@ app.controller('NewController', [
     '$http',
     '$routeParams',
     '$timeout',
+    '$interval',
     '$location',
     'FileUploader',
-function($scope, $http, $routeParams, $timeout, $location, FileUploader) {
+function($scope, $http, $routeParams, $timeout, $interval, $location, FileUploader) {
     if (bootstrap.add) {
         this.bootstrap = bootstrap.add;
     } else {
         $http.get('/api/add').success(function(data) {
             this.bootstrap = data.add;
-        }.bind(this));  
+        }.bind(this));
     }
 
     if ($routeParams.id) {
         $http.get('/api/experiment/' + $routeParams.id).success(function(data) {
-            this.data.details = data;
+
+            if (data.files.length) {
+                var files = [];
+
+                for (var i = 0, n = data.files.length; i < n; i++) {
+                    // massage files to match ng-file-upload api    
+                    files.push({
+                        file: data.files[i],
+                        progress: 100,
+                        isSuccess: true,
+                        remove: function() {
+                            // remove self from array
+                            // matches ng-file-upload api
+                            fake.splice(fake.indexOf(this), 1);
+                        }
+                    });
+                }
+
+                data.files = files;
+            }
+
+            this.data = data;
             this.data.experimentId = $routeParams.id;
+
         }.bind(this));
     }
 
-    $scope.stage = function(newStage) {
-        console.log('test');
-        return $location.path(newStage);
-    }
-
-    this.stage = 'details';
-
     this.data = {
-        id: null,
-        details: {}
+        files: [],
+        experimentId: null
     };
 
     this.save = function() {
         $http.post('/new', this.data).success(function(data) {
-            var newId = data.success;
-
+            this.data.experimentId = data.success;
         }.bind(this));
     };
 
@@ -82,42 +97,43 @@ function($scope, $http, $routeParams, $timeout, $location, FileUploader) {
 
     };
 
-    this.next = function($event) {
-        var sidebar = angular.element('#sidebar'),
-            currentIndex = sidebar.find('li.active').index(),
-            els = sidebar.find('li');
-
-        // if we're on the last stage, then loop back to beginning
-        if (currentIndex === els.length - 1) currentIndex = -1;
-
-        $event.stopPropagation();
-        // have to break out of apply loop... annoying
-        $timeout(function() {
-            els.eq(currentIndex + 1).triggerHandler('click');
-        }, 0);
-    };
-
     this.uploadCompleted = false;
+
     var uploader = $scope.uploader = new FileUploader({ url: '/upload' });
 
 
+    // mix in ng-file-upload queue with files thave have already been uploaded
+    this.flatQueue = function() {
+        // console.log(this.data.files);
+        return this.data.files.concat(uploader.queue);
+    }
+
+    uploader.onAfterAddingAll = function(items) {
+        uploader.uploadAll();
+    }
     uploader.onBeforeUploadItem = function(item) {
-        item.formData = [ this.data.experimentId ];
-    };
+        item.formData = [ { experimentId: this.data.experimentId } ];
+    }.bind(this);
     uploader.onCompleteItem = function(fileItem, response, status, headers) {
         console.info('onCompleteItem', fileItem, response, status, headers);
     };
     uploader.onCompleteAll = function() {
         console.info('onCompleteAll');
         this.uploadCompleted = true;
-    };
+        this.convert();
+    }.bind(this);
 
     this.convert = function() {
-        console.log('converting files');
-        $http.get('http://192.168.56.102:5000').success(function() {
-            console.log('hello')
+        $http.get('http://192.168.56.102:5000/convert/' + this.data.experimentId).success(function() {
+            $interval(checkConvertStatus, 5000);
         }.bind(this));
-    };
+    }
+
+    var checkConvertStatus = function() {
+        $http.get('http://192.168.56.102:5000/status/' + this.data.experimentId).success(function(data) {
+            console.log(data);
+        }.bind(this));
+    }.bind(this);
 }]);
 
 app.controller('NavController', ['$location', function($location) {

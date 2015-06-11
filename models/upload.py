@@ -4,6 +4,9 @@ from string import Template
 from csv import reader
 from inflection import camelize, singularize, titleize
 from collections import OrderedDict
+from werkzeug import secure_filename
+import os
+import errno
 
 class Experiments:
     def __init__(self):
@@ -55,7 +58,7 @@ class Experiment:
     def new(self, data):
         self.__db.cursor.execute(
             self.__sql('new_experiment'),
-            data['details']
+            data
         )
 
         experiment_id = self.__db.cursor.fetchone()[0]
@@ -65,13 +68,60 @@ class Experiment:
 
         return experiment_id
 
+    def upload_file(self, file, experiment_id):
+        UPLOAD_FOLDER = 'uploads'
+        ALLOWED_EXTENSIONS = set(['raw', 'RAW'])
+
+        def allowed_file(filename):
+            return '.' in filename and \
+                   filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+        def make_sure_path_exists(path):
+            try:
+                os.makedirs(path)
+            except OSError as exception:
+                if exception.errno != errno.EEXIST:
+                    raise
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            dir_path = os.path.join(UPLOAD_FOLDER, secure_filename(experiment_id))
+            save_path = os.path.join(dir_path, filename)
+
+            make_sure_path_exists(dir_path)
+
+            if not os.path.isfile(save_path):
+                file.save(save_path)
+
+                sql = 'UPDATE experiments SET files = array_append(files, %s) WHERE experiment_id = %s'
+                self.__db.cursor.execute(sql, (save_path, experiment_id))
+                self.__db.connection.commit()
+                self.__db.close()
+
+    def convert():
+        return 'hi'
+
+    def search():
+        return 'hi'
+
     def fetch(self, id):
         self.__db.dict_cursor.execute(
-            'SELECT description, experiment_type, name, organism_id as organism, probe_id as probe, sample_type FROM experiments WHERE experiment_id = %s',
+            'SELECT description, experiment_type, name, organism_id as organism, probe_id as probe, sample_type, files FROM experiments WHERE experiment_id = %s',
             (id, )
         )
 
         results = self.__db.dict_cursor.fetchone()
+        files = []
+
+        if results['files']:
+            for f in results['files']:
+                try:
+                    files.append({ 'name': os.path.basename(f), 'size': os.path.getsize(f) })
+                except:
+                    pass
+
+        results['files'] = files
+
         self.__db.close()
 
         return results

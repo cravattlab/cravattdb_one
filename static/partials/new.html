@@ -1,24 +1,12 @@
 <div class="container">
-    <div class="row">
-        <div class="col-md-3">
-            <ol id="sidebar">
-                <li ng-class="new.stage == 'details' ? 'active' : ''" ng-click="new.stage ='details'">Details</li>
-                <li ng-class="new.stage == 'upload' ? 'active' : ''" ng-click="new.stage ='upload'">File Upload</li>
-                <li ng-class="new.stage == 'search' ? 'active' : ''" ng-click="new.stage ='search'">Data Searching</li>
-                <li ng-class="new.stage == 'quantification' ? 'active' : ''" ng-click="new.stage ='quantification'">Quantification</li>
-            </ol>
-
-            <button ng-click="new.save()" id="save" class="btn btn-success" type="button">Save</button>
-            <button ng-click="new.delete()" id="delete" class="btn btn-warning" type="button">Delete</button>
-            <button ng-click="new.next($event)" id="next" class="btn btn-primary" type="button">Next</button>
-        </div>
-
-        <div class="col-md-9">
-            <pre>{{ this.new }}</pre>
-            <div ng-show="new.stage == 'details'" ng-include="'/static/partials/details.html'"></div>
-            <div ng-show="new.stage === 'upload'" ng-include="'/static/partials/upload.html'"></div>
-            <div ng-show="new.stage === 'search'" ng-include="'/static/partials/search.html'"></div>
-            <div ng-show="new.stage === 'quantification'" ng-include="'/static/partials/quantification.html'"></div>
-        </div>
-    </div>
+    <h2>Experimental Details</h2>
+    <div ng-include="'/static/partials/details.html'"></div>
+    <h2>File upload</h2>
+    <div ng-include="'/static/partials/upload.html'"></div>
+    <h2>Searching</h2>
+    <div ng-include="'/static/partials/search.html'"></div>
+    <h2>Quantification</h2>
+    <div ng-include="'/static/partials/quantification.html'"></div>
+    <button ng-click="new.save()" id="save" class="btn btn-success" type="button">Save</button>
+    <button ng-click="new.delete()" id="delete" class="btn btn-warning" type="button">Delete</button>
 </div>

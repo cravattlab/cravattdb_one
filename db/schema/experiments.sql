@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS experiments (
     probe_id integer references probes(id),
     name varchar(100),
     description text,
+    files text[],
     annotations hstore
 );
 

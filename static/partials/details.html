@@ -1,21 +1,18 @@
 <!-- <pre>{{ $parent.new | json}}</pre> -->
 <form name="details" class="form-horizontal">
 <fieldset>
-<!-- Form Name -->
-<legend>Experimental Details</legend>
-
     <!-- Text input-->
     <div class="form-group">
-        <label class="col-md-4 control-label" for="dataset-name">Dataset Name</label>  
-        <div class="col-md-4">
-            <input ng-model="$parent.new.data.details.name" id="dataset-name" name="dataset-name" type="text" placeholder="" class="form-control input-md" required="">
+        <label class="col-md-2 control-label" for="dataset-name">Dataset Name</label>  
+        <div class="col-md-5">
+            <input ng-model="$parent.new.data.name" id="dataset-name" name="dataset-name" type="text" placeholder="" class="form-control input-md" required="">
         </div>
     </div>
 
     <div class="form-group" ng-repeat="item in $parent.new.bootstrap">
-        <label class="col-md-4 control-label" for="{{ item.name }}">{{ item.label }}</label>
-        <div class="col-md-4">
-            <select id="item.name" ng-model="$parent.new.data.details[item.name]" name="{{ item.name }}" class="form-control">
+        <label class="col-md-2 control-label" for="{{ item.name }}">{{ item.label }}</label>
+        <div class="col-md-5">
+            <select id="item.name" ng-model="$parent.new.data[item.name]" name="{{ item.name }}" class="form-control">
                 <option ng-repeat="i in item.data" value="{{ i.id }}">{{ i.name }}</option>
             </select>
         </div>
@@ -23,9 +20,9 @@
 
     <!-- Textarea -->
     <div class="form-group">
-        <label class="col-md-4 control-label" for="description">Description</label>
-        <div class="col-md-4">                     
-            <textarea ng-model="$parent.new.data.details.description" class="form-control" id="description" name="description"></textarea>
+        <label class="col-md-2 control-label" for="description">Description</label>
+        <div class="col-md-5">                     
+            <textarea ng-model="$parent.new.data.description" class="form-control" id="description" name="description"></textarea>
         </div>
     </div>
 </fieldset>
