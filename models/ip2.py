@@ -1,5 +1,6 @@
 # from db.db import Database
 from bs4 import BeautifulSoup
+from distutils.util import strtobool
 import requests
 import re
 
@@ -52,7 +53,7 @@ class IP2:
 
         soup = BeautifulSoup(exp_req.text)
         table = soup.find('table', id='experimentO')
-        forms = table.find_all('form', action="editExperiment.html")
+        forms = table.find_all('form', action='editExperiment.html')
 
         for form in forms:
             sampleInput = form.find('input', attrs={'name':'sampleName'}, value=name)
@@ -124,6 +125,38 @@ class IP2:
 
     def check_job_status(self):
         """ check if job is finished """
+        session_text = requests.get('http://goldfish.scripps.edu/ip2/dwr/engine.js').text
+        session_id = re.search('_origScriptSessionId\s=\s"(\w+)"', session_text).group(1)
+
+        status_req = requests.post(
+            'http://goldfish.scripps.edu/ip2/dwr/call/plaincall/JobMonitor.getSearchJobStatus.dwr'
+            {
+                'callCount': 1,
+                'page': '/ip2/jobstatus.html',
+                'httpSessionId': '',
+                'scriptSessionId': session_id,
+                'c0-scriptName': 'JobMonitor',
+                'c0-methodName': 'getSearchJobStatus',
+                'c0-id': 0,
+                'batchId': 0
+            },
+            cookies=self.cookies,
+            headers
+        )
+
+        # find sample and get identifier
+        id = re.search('s(\d+)\.sampleName="' + name + '"', status_req.text)
+
+        # now collect all the information
+        info = re.findall('s' + id + '\.(\w+)=([\w"\._\-\s]+);', status_req.text)
+        info = dict(info)
+
+        # massaging 
+        info['finished'] = bool(strtobool(info['finished']))
+        info['jobId'] = int(info['jobId'])
+        info['progress'] = float(info['progress'])
+
+        return info
 
     def get_dtaselect(self):
         """ finally grab what we came for """
