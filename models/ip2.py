@@ -1,8 +1,11 @@
+# from db.db import Database
+from bs4 import BeautifulSoup
 import requests
 import re
 
 class IP2:  
-    def __init__(self, user):
+    def __init__(self):
+        # self.__db = Database()
         self.project_id = 0
         self.loggedOn = False
 
@@ -11,14 +14,13 @@ class IP2:
         self.login(params['username'], params['password'])
         self.set_project_id()
         self.set_experiment_id()
+        self.set_experiment_path()
         self.upload_spectra(params['files'])
         self.prolucid_search(params['search_criteria'])
         self.check_job_status()
 
-
     def login(self, username, password):
         """ login to IP2 """
-
         login_req = requests.post('http://goldfish.scripps.edu/ip2/j_security_check', {
             'j_username': username,
             'j_password': password,
@@ -45,10 +47,38 @@ class IP2:
     def set_experiment_id(self, name):
         exp_req = requests.get('http://goldfish.scripps.edu/ip2/viewExperiment.html', {
             'projectName': 'cravattdb',
-            'pid', 3346
+            'pid': self.project_id
+        }, cookies=self.cookies)
+
+        soup = BeautifulSoup(exp_req.text)
+        table = soup.find('table', id='experimentO')
+        forms = table.find_all('form', action="editExperiment.html")
+
+        for form in forms:
+            sampleInput = form.find('input', attrs={'name':'sampleName'}, value=name)
+
+            if sampleInput:
+                self.experiment_id = int(form.find('input', attrs={'name': 'expId'})['value'])
+                return
+
+    def set_experiment_path(self):
+        path_req = requests.get(
+            'http://goldfish.scripps.edu/ip2/eachExperiment.html', 
+            {
+                'experimentId': self.experiment_id,
+                'projectName': 'cravattdb',
+                'pid': self.project_id
+            },
+            cookies = self.cookies
         )
 
-        text = exp_req.text
+        soup = BeautifulSoup(path_req.text)
+
+        # soup.find('b', text="Spectra Path:").next_sibling.string.strip().replace('/spectra', '')
+        text = soup.find('div', class_='add_spectra').find('script', text=re.compile(r'.+expPath.+')).contents[0]
+        path = re.search('"expPath":\s"([\w/]+)"', text)
+        self.experiment_path = path.group(1)
+
 
     def create_experiment(self, name):
         """ create experiment under project """
@@ -59,25 +89,38 @@ class IP2:
                 'pid': self.project_id,
                 'projectName': 'cravattdb',
                 'sampleName': name,
-                'sampleDescription': ''
-                'instrumentId': 34
-                'month': 6
-                'data': '03',
+                'sampleDescription': '',
+                'instrumentId': 34,
+                'month': 6,
+                'date': '03',
                 'year': 2015,
                 'description': ''
             },
             cookies=self.cookies
         )
 
-
-
     def upload_spectra(self, files):
         """ upload .ms2 files """
         for f in files:
-
+            requests.post(
+                'http://goldfish.scripps.edu/helper/spectraUpload.jsp',
+                {
+                    'Filename': f.name,
+                    'expPath': self.experiment_path,
+                    'Filedata': f,
+                    'Upload': 'Submit Query'
+                },
+                cookies=self.cookies,
+                files={ f.name: f}
+            )
 
     def prolucid_search(self):
         """ perform prolucid search """
+
+        self.__db.execute('SELECT FROM ')
+        requests.post(
+            'http://goldfish.scripps.edu/ip2/prolucidProteinId.html',
+            )
 
     def check_job_status(self):
         """ check if job is finished """
@@ -85,21 +128,18 @@ class IP2:
     def get_dtaselect(self):
         """ finally grab what we came for """
 
-    def __find_experiment_id(self):
-        """ find experiment id """
-
     def __find_project_id(self):
         project_req = requests.get(
             'http://goldfish.scripps.edu/ip2/viewProject.html',
-            cookies=cookies
+            cookies=self.cookies
         )
 
         text = project_req.text
-        index = project_req.find('cravattdb')
+        index = text.find('cravattdb')
 
         if index != -1:
             text = text[index:]
-            return int(re.search('viewExperiment\.html\?pid=(\d+)').group(1))
+            return int(re.search('viewExperiment\.html\?pid=(\d+)', text).group(1))
         else:
             return False
 
