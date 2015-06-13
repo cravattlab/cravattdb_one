@@ -1,14 +1,19 @@
-# from db.db import Database
+from db import Database
 from bs4 import BeautifulSoup
 from distutils.util import strtobool
-import requests
-import re
+import flask.json, requests, re
 
-class IP2:  
-    def __init__(self):
-        # self.__db = Database()
+class IP2:
+    """ 
+    Helper class to programatically upload and search datasets on IP2.
+    Each instance of the class is tied to an experiment
+    """
+    def __init__(self, name=None):
+        self.__db = Database()
+        self.dataset_name = name
         self.project_id = 0
         self.loggedOn = False
+        self.project_name = 'cravatdb'
 
     def search(self, params):
         """ convenience method """
@@ -17,7 +22,7 @@ class IP2:
         self.set_experiment_id()
         self.set_experiment_path()
         self.upload_spectra(params['files'])
-        self.prolucid_search(params['search_criteria'])
+        self.prolucid_search()
         self.check_job_status()
 
     def login(self, username, password):
@@ -33,9 +38,12 @@ class IP2:
 
         return True
 
+    def logout(self):
+        """ log out of IP2 """
+        requets.get('http://goldfish.scripps.edu/ip2/logout.jsp', cookies=self.cookies)
+
     def set_project_id(self):
         """ get project id for cravattdb project or else create new project """
-
         project_id = self.__find_project_id()
 
         if not project_id:
@@ -46,10 +54,14 @@ class IP2:
         return project_id
 
     def set_experiment_id(self, name):
-        exp_req = requests.get('http://goldfish.scripps.edu/ip2/viewExperiment.html', {
-            'projectName': 'cravattdb',
-            'pid': self.project_id
-        }, cookies=self.cookies)
+        exp_req = requests.get(
+            'http://goldfish.scripps.edu/ip2/viewExperiment.html', 
+            {
+                'projectName': self.project_name,
+                'pid': self.project_id
+            }, 
+            cookies=self.cookies
+        )
 
         soup = BeautifulSoup(exp_req.text)
         table = soup.find('table', id='experimentO')
@@ -67,7 +79,7 @@ class IP2:
             'http://goldfish.scripps.edu/ip2/eachExperiment.html', 
             {
                 'experimentId': self.experiment_id,
-                'projectName': 'cravattdb',
+                'projectName': self.project_name,
                 'pid': self.project_id
             },
             cookies = self.cookies
@@ -88,7 +100,7 @@ class IP2:
             'http://goldfish.scripps.edu/ip2/addExperiment.html',
             {
                 'pid': self.project_id,
-                'projectName': 'cravattdb',
+                'projectName': self.project_name,
                 'sampleName': name,
                 'sampleDescription': '',
                 'instrumentId': 34,
@@ -115,21 +127,42 @@ class IP2:
                 files={ f.name: f}
             )
 
-    def prolucid_search(self):
+    def prolucid_search(self, protein_database_user_id=None, protein_database_id=None):
         """ perform prolucid search """
 
-        self.__db.execute('SELECT FROM ')
+        self.__db.cursor.execute(
+            'SELECT data FROM ip2_search_params WHERE experiment_type == %s'
+            (self.experiment_type, )
+        )
+
+        data = self.__db.dict_cursor.fetchone()
+        self.__db.close()
+
+        flask.json.loads(data)
+
+        data.update({
+            'expId': self.experiment_id,
+            'expPath': self.experiment_path,
+            'sampleName': self.experiment_name,
+            'pid': self.project_id,
+            'projectName': self.project_name,
+            'sp.proteinUserId': 72,
+            'sp.proteinDbId': 641  
+        })
+
         requests.post(
             'http://goldfish.scripps.edu/ip2/prolucidProteinId.html',
-            )
+            data,
+            cookies=self.cookies
+        )
 
-    def check_job_status(self):
+    def check_job_status(self, name):
         """ check if job is finished """
         session_text = requests.get('http://goldfish.scripps.edu/ip2/dwr/engine.js').text
         session_id = re.search('_origScriptSessionId\s=\s"(\w+)"', session_text).group(1)
 
         status_req = requests.post(
-            'http://goldfish.scripps.edu/ip2/dwr/call/plaincall/JobMonitor.getSearchJobStatus.dwr'
+            'http://goldfish.scripps.edu/ip2/dwr/call/plaincall/JobMonitor.getSearchJobStatus.dwr',
             {
                 'callCount': 1,
                 'page': '/ip2/jobstatus.html',
@@ -141,11 +174,11 @@ class IP2:
                 'batchId': 0
             },
             cookies=self.cookies,
-            headers
+            headers={ 'content-type': 'plain/text' }
         )
 
         # find sample and get identifier
-        id = re.search('s(\d+)\.sampleName="' + name + '"', status_req.text)
+        id = re.search('s(\d+)\.sampleName="' + name + '"', status_req.text).group(1)
 
         # now collect all the information
         info = re.findall('s' + id + '\.(\w+)=([\w"\._\-\s]+);', status_req.text)
@@ -156,10 +189,40 @@ class IP2:
         info['jobId'] = int(info['jobId'])
         info['progress'] = float(info['progress'])
 
+        # the first time we check, jot down the search id
+        if not self.search_id:
+            self.search_id = info['jobId']
+
         return info
 
     def get_dtaselect(self):
         """ finally grab what we came for """
+        path_req = requests.get(
+            'http://goldfish.scripps.edu/ip2/eachExperiment.html', 
+            {
+                'experimentId': self.experiment_id,
+                'projectName': self.project_name,
+                'pid': self.project_id
+            },
+            cookies = self.cookies
+        )
+
+        soup = BeautifulSoup(path_req.text)
+
+        search_td = soup.find('td', text=re.compile(self.search_id))
+
+        for el in search_td.next_siblings:
+            if el.name == 'td':
+                link = el.find('a', text='View').attrs['href']
+                break
+
+        # if not link:
+        dta_req = requests.get('http://goldfish.scripps.edu' + link, cookies=self.cookies)
+        soup = BeautifulSoup(dta_req.text)
+        dta_link = 'http://goldfish.scripps.edu' + soup.find('a', text=re.compile('DTASelect-filter')).attrs['href']
+
+        return requests.get(dta_link, cookies=self.cookies)
+
 
     def __find_project_id(self):
         project_req = requests.get(
@@ -168,7 +231,7 @@ class IP2:
         )
 
         text = project_req.text
-        index = text.find('cravattdb')
+        index = text.find(self.project_name)
 
         if index != -1:
             text = text[index:]
@@ -176,13 +239,12 @@ class IP2:
         else:
             return False
 
-
     def __create_new_project(self):
         """ create new ip2 project for cravattdb experiments """
         requests.post(
             'http://goldfish.scripps.edu/ip2/addProject.html', 
             {
-                'projectName': 'cravattdb2',
+                'projectName': self.project_name,
                 'desc': ''
             },
             cookies=self.cookies
