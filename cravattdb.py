@@ -4,6 +4,7 @@ from models.upload import Experiment, Experiments
 from models.list import List
 from models.dataset import Dataset
 from models.uploadRaw import UploadRaw
+from models.ip2 import IP2
 import config
 
 app = Flask(__name__)
@@ -35,6 +36,10 @@ def new(experiment_id=None):
             new_id = experiment.new(request.json)
             return json.dumps({ 'success': new_id })
 
+
+
+
+
 @app.route('/list')
 def list():
     return render_template('index.html', bootstrap = json.dumps(List().bootstrap()))
@@ -52,6 +57,21 @@ def dataset(experiment_id):
         bootstrap = json.dumps(dataset.bootstrap())
     )
 
+@app.route('/search/<int:experiment_id>')
+def search_experiment(experiment_id):
+    ''' search experiment '''
+    exp = experiment.Experiment(experiment_id)
+    ip2 = IP2(exp.data['name'])
+    ip2.login(config.IP2_USERNAME, config.IP2_PASSWORD)
+
+    # passing ip2 instance to convert wil
+    exp.convert(ip2)
+
+@app.route('/api/status/<int:experiment_id>')
+def get_status(experiment_id):
+    exp = experiment.Experiment(experiment_id)
+    return json.dumps(exp.status())
+
 @app.route('/api/experiment/<int:experiment_id>')
 def experiment_api(experiment_id):
     return json.dumps(Experiment().fetch(experiment_id))
@@ -63,6 +83,10 @@ def dataset_api(experiment_id):
 @app.route('/api/new', methods=['GET'])
 def new_api():
     return json.dumps(Experiments().bootstrap())
+
+
+
+
 
 @app.route('/test')
 def test():

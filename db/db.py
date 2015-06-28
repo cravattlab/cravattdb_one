@@ -1,7 +1,7 @@
 import psycopg2, psycopg2.extras, config
 
 class Database:
-    def __init__(self):
+    def __init__(self, templates=None):
         self.connection = psycopg2.connect(
             database = config.PGSQL_DATABASE_NAME,
             user = config.PGSQL_DATABASE_USER,
@@ -15,6 +15,18 @@ class Database:
             cursor_factory = psycopg2.extras.RealDictCursor
         )
 
+        if templates: self.__templates = templates
+
+        return self
+
     def close(self):
         self.cursor.close()
-        self.connection.close()
+        self.dict_cursor.close()
+
+    def commit(self):
+        self.connection.commit()
+        return self
+
+    def get_sql(self, template, data):
+        with open(self.__templates[template]) as f:
+            return f.read()

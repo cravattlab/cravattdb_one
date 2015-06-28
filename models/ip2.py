@@ -1,22 +1,22 @@
-from db import Database
+from db.db import Database
 from bs4 import BeautifulSoup
 from distutils.util import strtobool
 import flask.json, requests, re
 
 class IP2:
-    """ 
+    ''' 
     Helper class to programatically upload and search datasets on IP2.
     Each instance of the class is tied to an experiment
-    """
+    '''
     def __init__(self, name=None):
-        self.__db = Database()
+        self._db = Database()
         self.dataset_name = name
         self.project_id = 0
         self.loggedOn = False
         self.project_name = 'cravatdb'
 
     def search(self, params):
-        """ convenience method """
+        ''' convenience method '''
         self.login(params['username'], params['password'])
         self.set_project_id()
         self.set_experiment_id()
@@ -26,7 +26,7 @@ class IP2:
         self.check_job_status()
 
     def login(self, username, password):
-        """ login to IP2 """
+        ''' login to IP2 '''
         login_req = requests.post('http://goldfish.scripps.edu/ip2/j_security_check', {
             'j_username': username,
             'j_password': password,
@@ -39,16 +39,16 @@ class IP2:
         return True
 
     def logout(self):
-        """ log out of IP2 """
+        ''' log out of IP2 '''
         requets.get('http://goldfish.scripps.edu/ip2/logout.jsp', cookies=self.cookies)
 
     def set_project_id(self):
-        """ get project id for cravattdb project or else create new project """
-        project_id = self.__find_project_id()
+        ''' get project id for cravattdb project or else create new project '''
+        project_id = self._find_project_id()
 
         if not project_id:
-            self.__create_new_project()
-            project_id = self.__find_project_id()
+            self._create_new_project()
+            project_id = self._find_project_id()
 
         self.project_id = project_id
         return project_id
@@ -94,7 +94,7 @@ class IP2:
 
 
     def create_experiment(self, name):
-        """ create experiment under project """
+        ''' create experiment under project '''
 
         requests.post(
             'http://goldfish.scripps.edu/ip2/addExperiment.html',
@@ -113,7 +113,7 @@ class IP2:
         )
 
     def upload_spectra(self, files):
-        """ upload .ms2 files """
+        ''' upload .ms2 files '''
         for f in files:
             requests.post(
                 'http://goldfish.scripps.edu/helper/spectraUpload.jsp',
@@ -128,15 +128,15 @@ class IP2:
             )
 
     def prolucid_search(self, protein_database_user_id=None, protein_database_id=None):
-        """ perform prolucid search """
+        ''' perform prolucid search '''
 
-        self.__db.cursor.execute(
+        self._db.cursor.execute(
             'SELECT data FROM ip2_search_params WHERE experiment_type == %s'
             (self.experiment_type, )
         )
 
-        data = self.__db.dict_cursor.fetchone()
-        self.__db.close()
+        data = self._db.dict_cursor.fetchone()
+        self._db.close()
 
         flask.json.loads(data)
 
@@ -157,7 +157,7 @@ class IP2:
         )
 
     def check_job_status(self, name):
-        """ check if job is finished """
+        ''' check if job is finished '''
         session_text = requests.get('http://goldfish.scripps.edu/ip2/dwr/engine.js').text
         session_id = re.search('_origScriptSessionId\s=\s"(\w+)"', session_text).group(1)
 
@@ -196,7 +196,7 @@ class IP2:
         return info
 
     def get_dtaselect(self):
-        """ finally grab what we came for """
+        ''' finally grab what we came for '''
         path_req = requests.get(
             'http://goldfish.scripps.edu/ip2/eachExperiment.html', 
             {
@@ -224,7 +224,7 @@ class IP2:
         return requests.get(dta_link, cookies=self.cookies)
 
 
-    def __find_project_id(self):
+    def _find_project_id(self):
         project_req = requests.get(
             'http://goldfish.scripps.edu/ip2/viewProject.html',
             cookies=self.cookies
@@ -239,8 +239,8 @@ class IP2:
         else:
             return False
 
-    def __create_new_project(self):
-        """ create new ip2 project for cravattdb experiments """
+    def _create_new_project(self):
+        ''' create new ip2 project for cravattdb experiments '''
         requests.post(
             'http://goldfish.scripps.edu/ip2/addProject.html', 
             {
